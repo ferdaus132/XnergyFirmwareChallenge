@@ -2,19 +2,19 @@
 //definition of constants
 #define PICurrentKp	0.5   //proportional constant for PI current control loop
 #define PICurrentKi	0.1   //Integral constant for PI current control loop
-#define PICurrentMax 1.0  //Upper Limit for output and integral for PI current control loop
-#define PICurrentMin -1.0 //Lower Limit for output and integral for PI current control loop
-#define CurrentScale 0.01 //Scaling factor for current feedback and reference to value 1.0
-						  //Scaling factor is 1/absolute_max_current_reading
-						  //Example for absolute max 100A, current_scale is 0.01
+#define PICurrentMax 	1.0  //Upper Limit for output and integral for PI current control loop
+#define PICurrentMin 	-1.0 //Lower Limit for output and integral for PI current control loop
+#define CurrentScale 	0.01 //Scaling factor for current feedback and reference to value 1.0
+				//Scaling factor is 1/absolute_max_current_reading
+				//Example for absolute max 100A, current_scale is 0.01
 
 #define PIVoltageKp	0.5   //proportional constant for PI voltage control loop
 #define PIVoltageKi	0.1   //Integral constant for PI voltage control loop
-#define PIVoltageMax 1.0  //Upper Limit for output and integral for PI voltage control loop
-#define PIVoltageMin -1.0 //Lower Limit for output and integral for PI voltage control loop
-#define VoltageScale 0.01 //Scaling factor for voltage feedback and reference to value 1.0
-						  //Scaling factor is 1/absolute_max_voltage_reading
-						  //Example for absolute max 100V, voltage_scale is 0.01
+#define PIVoltageMax 	1.0  //Upper Limit for output and integral for PI voltage control loop
+#define PIVoltageMin 	-1.0 //Lower Limit for output and integral for PI voltage control loop
+#define VoltageScale 	0.01 //Scaling factor for voltage feedback and reference to value 1.0
+				//Scaling factor is 1/absolute_max_voltage_reading
+				//Example for absolute max 100V, voltage_scale is 0.01
 #define StateDL 0 //state idle
 #define StateCC 1 //state constant current
 #define StateCV 2 //state constant voltage
@@ -24,30 +24,30 @@
 
 //struct for PI variables
 typedef struct {
-    float  	fErr; 	// Data: control error value or proportional term
-    float  	fIntg; 	// Data: integral term  
-    float	fKp; 	// Parameter: proportional loop gain          
-    float   fKi; 	// Parameter: integral gain
-    float   fKc; 	// Parameter: sensor scaling
-	float	fReff; 	// Input: reference set-point
-	float	fFb; 	// Input: feedback
-	float	fMaxOut;// Parameter: upper saturation limit
-	float	fMinOut;// Parameter: lower saturation limit
-	float	fOut; 	// Output: controller output 
+    float  fErr; 	// Data: control error value or proportional term
+    float  fIntg; 	// Data: integral term  
+    float  fKp; 	// Parameter: proportional loop gain          
+    float  fKi; 	// Parameter: integral gain
+    float  fKc; 	// Parameter: sensor scaling
+    float  fReff; 	// Input: reference set-point
+    float  fFb; 	// Input: feedback
+    float  fMaxOut;// Parameter: upper saturation limit
+    float  fMinOut;// Parameter: lower saturation limit
+    float  fOut; 	// Output: controller output 
 } fPIVar;
 
 //Default Value for PI variables
 #define DefaultPIVar {   \
-					0.0, \
-					0.0, \
-					0.0, \
-					0.0, \
-					0.0, \
-					0.0, \
-					0.0, \
-					0.0, \
-					0.0, \
-					0.0  \
+			0.0, \
+			0.0, \
+			0.0, \
+			0.0, \
+			0.0, \
+			0.0, \
+			0.0, \
+			0.0, \
+			0.0, \
+			0.0  \
 }
 
 //procedure to calculate PI
@@ -171,36 +171,36 @@ void main_state_machine(void){
 	/**************************/
 	switch(MainState){
 		case StateDL: 
-						if(enable_command == _TRUE){ //wait for enable command
-							MainState=StateCC;	//set state to constant current
-						}
-						break;
+				if(enable_command == _TRUE){ //wait for enable command
+					MainState=StateCC;	//set state to constant current
+				}
+				break;
 		case StateCC:	//wait for the voltage reach voltage reference
-						if(voltage_feedback >= voltage_reference){
-							//set state to constant voltage							
-							MainState=StateCV; 
-							//initiate integral value for voltage control loop 
-							//for smooth transitioning
-							PIVoltage.fIntg=PICurrent.fReff;
-						}
-						break;
+				if(voltage_feedback >= voltage_reference){
+					//set state to constant voltage							
+					MainState=StateCV; 
+					//initiate integral value for voltage control loop 
+					//for smooth transitioning
+					PIVoltage.fIntg=PICurrent.fReff;
+				}
+				break;
 		case StateCV: 	//if voltage drop below reference and hysteresis band, 
-						//change state to constant current 
-						if(voltage_feedback < (voltage_reference-voltage_hysband)){ 
-							//set state to constant current if voltage drop below 
-							//reference and hysteresis band
-							MainState=StateCC; 
-						}else{
-							//if current decreased below minimum current, set state to idle
-							if(current_feedback < minimum_current){ 
-								MainState=StateDL;	//set state to idle`
-								enable_command = _FALSE; //set enable_command to false
-							}
-						}
-						break;
+				//change state to constant current 
+				if(voltage_feedback < (voltage_reference-voltage_hysband)){ 
+					//set state to constant current if voltage drop below 
+					//reference and hysteresis band
+					MainState=StateCC; 
+				}else{
+					//if current decreased below minimum current, set state to idle
+					if(current_feedback < minimum_current){ 
+						MainState=StateDL;	//set state to idle`
+						enable_command = _FALSE; //set enable_command to false
+					}
+				}
+				break;
 		default: 
-						MainState=StateDL; //set default state to idle
-						break;
+				MainState=StateDL; //set default state to idle
+				break;
 	}
 		
 	if(enable_command == _FALSE){ 
